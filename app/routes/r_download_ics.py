@@ -10,7 +10,7 @@ from starlette.background import BackgroundTask
 from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
 from app.ics_manipulation import create_ics_calendar
-from py_core.db.read.course_read import get_courses_via_data_id
+from py_core.db.course import get_courses_via_data_id
 
 router = APIRouter(prefix="/download", tags=["download"])
 
