@@ -15,12 +15,12 @@ from py_core.db.course import get_courses_via_data_id
 router = APIRouter(prefix="/download", tags=["download"])
 
 
-class DownloadCourses(BaseModel):
+class RequestDownloadCourses(BaseModel):
     course_data_ids: list[int]
 
 
 @router.post("/ics/courses")
-async def courses_download(r: Request, r_model: DownloadCourses) -> FileResponse:
+async def courses_download(r: Request, r_model: RequestDownloadCourses) -> FileResponse:
     """Download ics file based on given course_data_ids.
 
     Args:
