@@ -6,6 +6,15 @@ of this file (main.py). However, here uvicorn is called so FastAPI should run wh
 Remember to get to the docs it looks like this: http://localhost:8000/docs.
 """
 
+import sys
+
+if __package__ is None and not hasattr(sys, "frozen"):
+    # direct call of __main__.py
+    import os.path
+
+    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, os.path.realpath(path))
+
 import os
 
 import uvicorn
