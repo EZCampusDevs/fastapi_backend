@@ -11,7 +11,7 @@ import os
 import bcrypt
 from fastapi_login import LoginManager
 
-from db import users
+# from db import users
 
 manager = LoginManager(secret=os.getenv("auth_secret_key"), token_url="/auth/token", use_cookie=True)
 
@@ -25,7 +25,8 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 @manager.user_loader()
 def load_user(user_query: str) -> json:
-    user = users.auth_search_user(user_query)
+    # user = users.auth_search_user(user_query)
+    user = None
     if user is None:
         return
     return user
