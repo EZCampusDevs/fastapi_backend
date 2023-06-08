@@ -1,7 +1,8 @@
 """FastAPI main.py module.
 
-Normally to run FastAPI manually using uvicorn you use: "uvicorn main:app --reload" in the terminal from the directory
-of this file (main.py). However, here uvicorn is called so FastAPI should run when main is run.
+Normally to run FastAPI manually using uvicorn you use: "uvicorn main:app --reload" in the terminal
+from the directory of this file (main.py). However, here uvicorn is called so FastAPI should run
+when main is run.
 
 Remember to get to the docs it looks like this: http://localhost:8000/docs.
 """
@@ -23,22 +24,30 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.general_exceptions import API_404_USER_NOT_FOUND
-from app.routes import (r_download_ics)
+from app.routes import r_download_ics, r_schedule_optimizer
 from auth import manager
 from py_core.classes.user_classes import BasicUser
 
 load_dotenv()
 
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=[os.getenv("origins_domain")], allow_credentials=True,
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.getenv("origins_domain")],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # FastAPI app routers:
 app.include_router(r_download_ics.router)
+app.include_router(r_schedule_optimizer.router)
 
 # HTTPExceptions
 API_200_AUTHORIZED_USER = HTTPException(status.HTTP_200_OK, "User is authenticated")
-API_200_UNAUTHORIZED_USER = HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired auth token")
+API_200_UNAUTHORIZED_USER = HTTPException(
+    status.HTTP_401_UNAUTHORIZED, "Invalid or expired auth token"
+)
 
 
 @app.get("/")
@@ -78,4 +87,6 @@ async def homepage(user: BasicUser = Depends(manager)) -> dict:
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=os.getenv("fastapi_host"), port=int(os.getenv("fastapi_port")))
+    uvicorn.run(
+        "main:app", host=os.getenv("fastapi_host"), port=int(os.getenv("fastapi_port"))
+    )
