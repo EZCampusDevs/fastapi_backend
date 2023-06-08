@@ -10,7 +10,7 @@ from starlette.background import BackgroundTask
 from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
 from app.ics_manipulation import create_ics_calendar
-from py_core.db.course import get_courses_via_data_id
+from py_core.db.course import get_courses_via
 
 router = APIRouter(prefix="/download", tags=["download"])
 
@@ -33,7 +33,7 @@ async def courses_download(r: Request, r_model: RequestDownloadCourses) -> FileR
     try:
         if not r_model.course_data_ids:
             raise general_exceptions.API_400_COURSE_DATA_IDS_UNSPECIFIED
-        courses = get_courses_via_data_id(r_model.course_data_ids)
+        courses = get_courses_via(course_data_id_list=r_model.course_data_ids)
         if not courses:
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
         file_path = create_ics_calendar(source_list=courses)
@@ -49,6 +49,10 @@ async def courses_download(r: Request, r_model: RequestDownloadCourses) -> FileR
     # TODO: LOG
     #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
 
-    return FileResponse(status_code=200, path=file_path,
-                        filename=f"courses_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.ics",
-                        media_type="text/calendar", background=BackgroundTask(remove_file_path, file_path))
+    return FileResponse(
+        status_code=200,
+        path=file_path,
+        filename=f"courses_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.ics",
+        media_type="text/calendar",
+        background=BackgroundTask(remove_file_path, file_path),
+    )
