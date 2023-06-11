@@ -13,7 +13,7 @@ pipeline {
                             ./build.sh
                             ''', execTimeout: 120000, flatten: false, makeEmptyDirs: true, 
                             noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'fastapi_backend', remoteDirectorySDF: false, 
-                            removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, .env, entrypoint.sh, fastapi_backend/**')
+                            removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, .env, entrypoint.sh, *')
                         ], 
                         usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
                     ])
