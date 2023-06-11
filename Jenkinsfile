@@ -6,17 +6,19 @@ pipeline {
         stage('Build Docker Image') { 
             steps { 
 
-                    sshPublisher(publishers: [
+                    sshPublisher(
+                        failOnError: true,
+                        publishers: [
                         sshPublisherDesc(configName: '2GB_Glassfish_VPS', transfers: [
                             sshTransfer(cleanRemote: true, excludes: '', execCommand: '''
+                            cd ~/pipline_fastapi_backend
                             chmod +x build.sh
                             ./build.sh
-                            ls
                             ''', execTimeout: 120000, flatten: false, makeEmptyDirs: true, 
-                            noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'fastapi_backend', remoteDirectorySDF: false, 
+                            noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'pipline_fastapi_backend', remoteDirectorySDF: false, 
                             removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, .env, entrypoint.sh, **')
                         ], 
-                        usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)
+                        usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
                     ])
             }
         }
