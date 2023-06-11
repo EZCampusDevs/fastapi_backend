@@ -9,7 +9,6 @@ pipeline {
                     sshPublisher(publishers: [
                         sshPublisherDesc(configName: '2GB_Glassfish_VPS', transfers: [
                             sshTransfer(cleanRemote: true, excludes: '', execCommand: '''
-                            cd ~/fastapi_backend
                             chmod +x build.sh
                             ./build.sh
                             ''', execTimeout: 120000, flatten: false, makeEmptyDirs: true, 

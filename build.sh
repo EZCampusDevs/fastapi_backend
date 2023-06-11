@@ -13,4 +13,4 @@ exec 1>$log_file 2>&1
 
 chmod +x entrypoint.sh
 
-docker build -t dscrape .
+docker build -t fastapi_image .
