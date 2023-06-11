@@ -5,7 +5,7 @@ ARG DIR="/opt/fastapi"
 RUN mkdir $DIR
 
 # does ./ copy from local dir?
-COPY ./fastapi_backend $DIR
+COPY fastapi_backend $DIR
 
 COPY .env $DIR
 
