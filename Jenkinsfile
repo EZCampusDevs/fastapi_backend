@@ -13,8 +13,8 @@ pipeline {
                             chmod +x build.sh
                             ./build.sh
                             ''', execTimeout: 120000, flatten: false, makeEmptyDirs: true, 
-                            noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'pipeline_datascraper', remoteDirectorySDF: false, 
-                            removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, deploy.sh, .env, entrypoint.sh, dscrape/**')
+                            noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'fastapi_backend', remoteDirectorySDF: false, 
+                            removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, .env, entrypoint.sh, dscrape/**')
                         ], 
                         usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
                     ])
