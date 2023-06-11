@@ -5,9 +5,9 @@ ARG DIR="/opt/fastapi"
 RUN mkdir $DIR
 
 # does ./ copy from local dir?
-COPY fastapi_backend $DIR
+COPY . $DIR
 
-COPY .env $DIR
+#COPY .env $DIR
 
 RUN pip install -r $DIR/requirements.txt
 
