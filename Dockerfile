@@ -11,4 +11,6 @@ COPY . $DIR
 
 RUN pip install -r $DIR/requirements.txt
 
-ENTRYPOINT ["/opt/fastapi/run.sh"]
+RUN chmod +x $DIR/entrypoint.sh
+
+ENTRYPOINT ["/opt/fastapi/entrypoint.sh"]
