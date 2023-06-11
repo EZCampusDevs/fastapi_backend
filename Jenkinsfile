@@ -11,11 +11,12 @@ pipeline {
                             sshTransfer(cleanRemote: true, excludes: '', execCommand: '''
                             chmod +x build.sh
                             ./build.sh
+                            ls
                             ''', execTimeout: 120000, flatten: false, makeEmptyDirs: true, 
                             noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: 'fastapi_backend', remoteDirectorySDF: false, 
                             removePrefix: '', sourceFiles: 'Dockerfile, requirements.txt, build.sh, .env, entrypoint.sh, **')
                         ], 
-                        usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)
+                        usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)
                     ])
             }
         }
