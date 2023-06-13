@@ -23,5 +23,22 @@ pipeline {
             }
         }
     }
+    
+    post {
+        always {
+            discordSend(
+                        description: currentBuild.result, 
+                        enableArtifactsList: false, 
+                        footer: '', 
+                        image: '', 
+                        link: '', 
+                        result: currentBuild.result, 
+                        scmWebUrl: '', 
+                        thumbnail: '', 
+                        title: env.JOB_BASE_NAME, 
+                        webhookURL: "${DISCORD_WEBHOOK_1}"
+                    )
+        }
+    }
 }
 
