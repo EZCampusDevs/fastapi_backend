@@ -76,7 +76,7 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
             ensure_restrictions_met=r_model.ensure_restrictions_met,
             restrictions_met=r_model.restrictions_met,
         )
-        return HTTPException(status_code=status.HTTP_200_OK, detail=result)
+        raise HTTPException(status_code=status.HTTP_200_OK, detail=result)
     except HTTPException as h:
         # TODO: LOG
         #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
