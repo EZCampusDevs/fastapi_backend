@@ -43,7 +43,7 @@ done
 
 echo "Running build..."
 
-docker run -itd --rm -p 8000:8000 --network EZnet --name $container_name fastapi_backend
+docker run -itd --rm -p 8000:8080 --network EZnet --name $container_name fastapi_backend
 
 echo "Deploy done."
 
