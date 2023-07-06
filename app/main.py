@@ -45,15 +45,21 @@ app.include_router(r_schedule_optimizer.router)
 
 # HTTPExceptions
 API_200_AUTHORIZED_USER = HTTPException(status.HTTP_200_OK, "User is authenticated")
-API_200_UNAUTHORIZED_USER = HTTPException(
+API_200_HEARTBEAT = HTTPException(status.HTTP_200_OK, "I am alive")
+API_401_UNAUTHORIZED_USER = HTTPException(
     status.HTTP_401_UNAUTHORIZED, "Invalid or expired auth token"
 )
 
 
 @app.get("/")
+async def heartbeat():
+    raise API_200_HEARTBEAT
+
+
+@app.get("/root")
 async def root(user: BasicUser = Depends(manager)):
     if user is None:
-        raise API_200_UNAUTHORIZED_USER
+        raise API_401_UNAUTHORIZED_USER
     raise API_200_AUTHORIZED_USER
 
 
@@ -87,6 +93,4 @@ async def homepage(user: BasicUser = Depends(manager)) -> dict:
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app", host=os.getenv("fastapi_host"), port=int(os.getenv("fastapi_port"))
-    )
+    uvicorn.run("main:app", host=os.getenv("fastapi_host"), port=int(os.getenv("fastapi_port")))
