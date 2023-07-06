@@ -8,6 +8,7 @@ pipeline {
                 steps {
 
                     withCredentials([string(credentialsId: 'FAST_API_AUTH_SECRET', variable: 'AUTH_SECRET')]) {
+                    withCredentials([string(credentialsId: 'ORIGINS_DOMAIN_SECRET', variable: 'ORIGINS_DOMAIN')]) {
 
                         withCredentials([usernamePassword(credentialsId: 'MYSQL_USER_PASS_2', passwordVariable: 'PASSWORD_1', usernameVariable: 'USERNAME_1')]) {
 
@@ -21,8 +22,10 @@ db_dir="."
 DEBUG=0
 fastapi_host="127.0.0.1"
 fastapi_port="8080"
-origins_domain="${AUTH_SECRET}"
+auth_secret_key="${AUTH_SECRET}"
+origins_domain="${ORIGINS_DOMAIN}"
 """
+                        }
                         }
                     }
                 }
