@@ -12,17 +12,17 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'MYSQL_USER_PASS_2', passwordVariable: 'PASSWORD_1', usernameVariable: 'USERNAME_1')]) {
 
                             writeFile file: './.env', text: """
-                                db_user="${USERNAME_1}" 
-                                db_pass="${PASSWORD_1}" 
-                                db_name="ezcampus_db"
-                                db_port="3306"
-                                db_host="mysql-instance"
-                                db_dir="."
-                                DEBUG=0
-                                fastapi_host="127.0.0.1"
-                                fastapi_port="8080"
-                                origins_domain="${AUTH_SECRET}"
-                                """
+db_user="${USERNAME_1}" 
+db_pass="${PASSWORD_1}" 
+db_name="ezcampus_db"
+db_port="3306"
+db_host="mysql-instance"
+db_dir="."
+DEBUG=0
+fastapi_host="127.0.0.1"
+fastapi_port="8080"
+origins_domain="${AUTH_SECRET}"
+"""
                         }
                     }
                 }
@@ -43,9 +43,10 @@ pipeline {
                                     execCommand: '''
                                     cd ~/pipeline_fastapi_backend
                                     chmod +x build.sh
-                                    ./build.sh
+                                    ./build.sh USE_LOG_FILE
                                     chmod +x deploy.sh
-                                    ./deploy.sh
+                                    ./deploy.sh USE_LOG_FILE
+                                    rm -rf ./.env
                                     ''',
                                     execTimeout: 120000,
                                     flatten: false,

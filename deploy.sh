@@ -1,14 +1,34 @@
 #!/bin/sh
 
-log_dir="$HOME/log/jenkins-ssh"
-mkdir -p $log_dir
+USE_LOG_FILE_ARGUMENT="USE_LOG_FILE"
 
-log_file="$log_dir/fastapi_backend-dockerrun-log.out"
-touch log_file
+if [ $# != 0 ]; then
 
-exec 3>&1 4>&2
-trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>$log_file 2>&1
+   echo "Processing start arguments"
+
+   for arg in "$@"; do
+
+      if [ "$arg" = "$USE_LOG_FILE_ARGUMENT" ]; then
+
+         echo "Writing all stdout and stderr to file"
+
+         log_dir="$HOME/log/jenkins-ssh"
+         mkdir -p $log_dir
+
+         log_file="$log_dir/fastapi_backend-dockerrun-log.out"
+         touch $log_file
+
+         exec 3>&1 4>&2
+         trap 'exec 2>&4 1>&3' 0 1 2 3
+         exec 1>$log_file 2>&1
+
+      fi
+
+   done
+
+fi
+
+
 
 container_name="fastapi_backend-instance"
 
@@ -26,3 +46,4 @@ echo "Running build..."
 docker run -itd --rm -p 8000:8000 --network EZnet --name $container_name fastapi_backend
 
 echo "Deploy done."
+
