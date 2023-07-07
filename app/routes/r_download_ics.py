@@ -41,9 +41,9 @@ async def courses_download(r: Request, r_model: RequestDownloadCourses) -> FileR
         # TODO: LOG
         #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
         raise h
-    except Exception:  # All other python errors are cast and logged as 500.
+    except Exception as e:  # All other python errors are cast and logged as 500.
         h = general_exceptions.API_500_ERROR
-        # TODO: LOG
+        print(e)
         #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
         raise h
     # TODO: LOG
