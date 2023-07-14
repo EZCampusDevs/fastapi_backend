@@ -170,7 +170,7 @@ def course_level_optimizer(
         return initial_schedule, 1.0, 1
     if ensure_open_seats:
         # Remove all options with no open seats.
-        options = [c for c in options if c.seats_available > 0]
+        options = [c for c in options if c.available_enrollment > 0]
         if not options:  # Empty options list.
             raise API_404_OPEN_SEATS_CONFLICT
     if ensure_restrictions_met and restrictions_met is not None:
