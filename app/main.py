@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.general_exceptions import API_404_USER_NOT_FOUND
 from app.routes import r_download_ics, r_schedule_optimizer
 from auth import manager
+from py_core import logging_util
 from py_core.classes.user_classes import BasicUser
 from py_core.db import init_database
 
@@ -94,5 +95,7 @@ async def homepage(user: BasicUser = Depends(manager)) -> dict:
 
 
 if __name__ == "__main__":
+    logging_util.setup_logging()
+    logging_util.add_unhandled_exception_hook()
     init_database()
     uvicorn.run("main:app", host=os.getenv("fastapi_host"), port=int(os.getenv("fastapi_port")))
