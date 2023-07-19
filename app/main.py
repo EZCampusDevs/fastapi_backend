@@ -24,7 +24,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.general_exceptions import API_404_USER_NOT_FOUND
-from app.routes import r_download_ics, r_experimental, r_schedule_optimizer
+from app.routes import r_download_ics, r_experimental, r_google_api, r_schedule_optimizer
 from auth import manager
 from py_core import logging_util
 from py_core.classes.user_classes import BasicUser
@@ -44,6 +44,7 @@ app.add_middleware(
 # FastAPI app routers:
 app.include_router(r_download_ics.router)
 app.include_router(r_experimental.router)
+app.include_router(r_google_api.router)
 app.include_router(r_schedule_optimizer.router)
 
 # HTTPExceptions
