@@ -17,6 +17,9 @@ ezcampus_venv
 *.log
 *.log.*
 
+# Google API client credentials .json file
+client_secret*.json
+
 ####################################################################################################
 # Backend .gitignore
 # This section was made based of the GitHub Python .gitignore: https://github.com/github/gitignore/blob/main/Python.gitignore
