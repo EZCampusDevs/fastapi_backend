@@ -57,7 +57,7 @@ def __build_from_ex_meeting(ex_mt: ExtendedMeeting) -> str:
     return (
         f"BEGIN:VEVENT\n"
         f"SUMMARY:{ex_mt.name}\n"
-        f"DESCRIPTION:{ex_mt.description}\n"
+        f"DESCRIPTION:{ex_mt.raw_new_line_description()}\n"
         f"LOCATION:{ex_mt.location}\n"
         f"{ex_mt.get_ics_rrule_str()}\n"
         f"END:VEVENT\n"
