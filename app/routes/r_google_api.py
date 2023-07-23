@@ -7,13 +7,14 @@ from dotenv import load_dotenv
 from fastapi import HTTPException, Depends, APIRouter, status
 from fastapi.security import OAuth2PasswordBearer
 from google_auth_oauthlib.flow import Flow
+from typing import Annotated
 
 load_dotenv()
 
 router = APIRouter(prefix="/google-api", tags=["google-api"])
 
 # Assuming you've created a JWT token and set it as a bearer token in your requests
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/start")
 
 SCOPES = [
     "openid",
@@ -26,7 +27,7 @@ SCOPES = [
 flow = Flow.from_client_secrets_file(
     client_secrets_file=os.getenv("google_client_credentials"),
     scopes=SCOPES,
-    redirect_uri="http://localhost:60000/google-api/auth/callback",
+    redirect_uri="http://localhost:8000/google-api/auth/callback",
 )
 
 
@@ -39,9 +40,9 @@ def verify_token(token: str):
 
 
 @router.get("/auth/start")
-def start_auth(token: str = Depends(oauth2_scheme)):
-    payload = verify_token(token)
-
+def start_auth():
+    payload = {}
+    
     authorization_url, state = flow.authorization_url(
         access_type="offline", include_granted_scopes="true"
     )
@@ -52,12 +53,13 @@ def start_auth(token: str = Depends(oauth2_scheme)):
 
     # Create a new JWT with the state included.
     new_token = jwt.encode(payload, os.getenv("jwt_secret_key"), algorithm="HS256")
+    print(authorization_url)
 
     return {"authorization_url": authorization_url, "token": new_token}
 
 
 @router.get("/auth/callback")
-def auth_callback(code: str, state: str, token: str = Depends(oauth2_scheme)):
+def auth_callback(code: str, state: str, token: Annotated[str, Depends(oauth2_scheme)]):
     """Callback for user credentials using JWT.
 
     Args:
@@ -69,6 +71,7 @@ def auth_callback(code: str, state: str, token: str = Depends(oauth2_scheme)):
     """
     # Verify the JWT and get the payload.
     payload = verify_token(token)
+    print(payload)
 
     # Retrieve the stored state.
     stored_state = payload.get("state", None)
