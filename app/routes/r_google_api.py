@@ -1,69 +1,86 @@
 """Google's API services API endpoint routes."""
 
-from fastapi import APIRouter, HTTPException, Request
-from fastapi import status
-from pydantic import BaseModel
-from starlette.background import BackgroundTask
+import os
 
-from app import general_exceptions
-from app.google_services import authenticate_google, export_to_google_calendar
-from py_core.classes.course_class import course_to_extended_meetings
-from py_core.db.course import get_courses_via
+import jwt
+from dotenv import load_dotenv
+from fastapi import HTTPException, Depends, APIRouter, status
+from fastapi.security import OAuth2PasswordBearer
+from google_auth_oauthlib.flow import Flow
+
+load_dotenv()
 
 router = APIRouter(prefix="/google-api", tags=["google-api"])
 
+# Assuming you've created a JWT token and set it as a bearer token in your requests
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-class RequestExportCourses(BaseModel):
-    course_data_ids: list[int]
-    creds: str | None = None
-    calendar_name: str | None = None
+SCOPES = [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/calendar",
+]
+
+# Load your client_secrets.json
+flow = Flow.from_client_secrets_file(
+    client_secrets_file=os.getenv("google_client_credentials"),
+    scopes=SCOPES,
+    redirect_uri="http://localhost:60000/google-api/auth/callback",
+)
 
 
-@router.post("/auth")
-async def auth(r: Request):
+def verify_token(token: str):
     try:
-        detail = authenticate_google()
-    except HTTPException as h:
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
-        raise h
-
-    raise HTTPException(status_code=status.HTTP_200_OK, detail=detail)
+        payload = jwt.decode(token, os.getenv("jwt_secret_key"), algorithms=["HS256"])
+        return payload
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
 
 
-@router.post("/gcal/export")
-async def google_calendar_export(r: Request, r_model: RequestExportCourses):
-    """Download ics file based on given course_data_ids.
+@router.get("/auth/start")
+def start_auth(token: str = Depends(oauth2_scheme)):
+    payload = verify_token(token)
+
+    authorization_url, state = flow.authorization_url(
+        access_type="offline", include_granted_scopes="true"
+    )
+
+    # Store the state in your JWT session or any other way you handle user session.
+    # Add logic here to add the state to your session.
+    payload["state"] = state
+
+    # Create a new JWT with the state included.
+    new_token = jwt.encode(payload, os.getenv("jwt_secret_key"), algorithm="HS256")
+
+    return {"authorization_url": authorization_url, "token": new_token}
+
+
+@router.get("/auth/callback")
+def auth_callback(code: str, state: str, token: str = Depends(oauth2_scheme)):
+    """Callback for user credentials using JWT.
 
     Args:
-        r: fastapi.Request object.
-        r_model: DownloadCourses request model object.
-
-    Returns:
-        Download for the created ics calendar file.
+        code: Authorization code that Google's OAuth 2.0 server returns as part of OAuth 2.0
+            authorization code flow.
+        state: OAuth 2.0 authorization parameter.
+            See: https://auth0.com/docs/secure/attack-protection/state-parameters.
+        token: JWT token.
     """
-    try:
-        if not r_model.course_data_ids:
-            raise general_exceptions.API_400_COURSE_DATA_IDS_UNSPECIFIED
-        courses = get_courses_via(course_data_id_list=r_model.course_data_ids)
-        if not courses:
-            raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
-        export_to_google_calendar(
-            creds=r_model.creds, ex_mt_list=course_to_extended_meetings(courses),
-            calendar_name=r_model.calendar_name
-        )
-    except HTTPException as h:
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
-        raise h
-    # except Exception as e:  # All other python errors are cast and logged as 500.
-    #     h = general_exceptions.API_500_ERROR
-    #     # TODO: LOG
-    #     #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
-    #     raise h
-    # TODO: LOG
-    #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
+    # Verify the JWT and get the payload.
+    payload = verify_token(token)
 
-    return HTTPException(
-        status_code=status.HTTP_200_OK, detail="Successful export to Google Calendar.",
-    )
+    # Retrieve the stored state.
+    stored_state = payload.get("state", None)
+    if stored_state != state:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="State mismatch error")
+    flow.fetch_token(code=code)
+    credentials = flow.credentials
+
+    # Store the credentials in your session or database.
+    payload["credentials"] = credentials.to_json()
+
+    # Create a new JWT with the credentials included.
+    new_token = jwt.encode(payload, os.getenv("jwt_secret_key"), algorithm="HS256")
+
+    return {"message": "success", "token": new_token}
