@@ -1,13 +1,15 @@
 """Google's API services API endpoint routes."""
 
 import json
+import logging
 import os
 
-import jwt
 import requests
 from dotenv import load_dotenv
-from fastapi import HTTPException, APIRouter, status
+from fastapi import APIRouter
 from google_auth_oauthlib.flow import Flow
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -28,14 +30,6 @@ flow = Flow.from_client_secrets_file(
 )
 
 
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, os.getenv("jwt_secret_key"), algorithms=["HS256"])
-        return payload
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-
-
 @router.get("/auth/start")
 def start_auth():
     authorization_url, _ = flow.authorization_url(
@@ -46,6 +40,7 @@ def start_auth():
 
 @router.get("/auth/callback")
 def auth_callback(code: str, state: str):
+    """Google OAuth2 Callback for Calendar Event exporting"""
     flow.fetch_token(code=code)
     credentials = flow.credentials  # Load credentials from the json.
 
@@ -82,8 +77,9 @@ def auth_callback(code: str, state: str):
     )
 
     if response.status_code == 200:
-        print("Event created: %s" % (response.json().get("htmlLink")))
+        logging.debug(
+            f"Successfully created Google Calendar event: {(response.json().get('htmlLink'))}"
+        )
     else:
-        print("Failed to create event:", response.content)
-
+        logging.error(f"Failed to create Google Calendar event: {response.content}")
     return {"message": "success", "credentials": credentials.to_json()}
