@@ -82,7 +82,7 @@ async def root(user: BasicUser = Depends(manager)):
 
 
 @app.get("/session-id")
-async def root(r: Request):
+async def session_id(r: Request):
     """Generate session id based on SessionMiddleware JWT.
 
     Notes:
