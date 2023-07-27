@@ -17,11 +17,12 @@ if __package__ is None and not hasattr(sys, "frozen"):
     sys.path.insert(0, os.path.realpath(path))
 
 import os
-
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
+from secrets import token_hex
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.general_exceptions import API_404_USER_NOT_FOUND
 from app.routes import r_download_ics, r_experimental, r_google_api, r_schedule_optimizer
@@ -32,7 +33,10 @@ from py_core.db import init_database
 
 load_dotenv()
 
+# FastAPI app.
 app = FastAPI()
+
+# FastAPI middleware.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,6 +44,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_secret_key"))
 
 # FastAPI app routers:
 app.include_router(r_download_ics.router)
@@ -65,6 +70,18 @@ async def root(user: BasicUser = Depends(manager)):
     if user is None:
         raise API_401_UNAUTHORIZED_USER
     raise API_200_AUTHORIZED_USER
+
+
+@app.get("/session-id")
+async def root(r: Request):
+    """Generate session id based on SessionMiddleware JWT.
+
+    Notes:
+        Actual JWT created by SessionMiddleware at r.cookies["session"].
+    """
+    if "session_id" not in r.session:
+        r.session["session_id"] = token_hex(16)  # You can adjust the length of the session ID.
+    return {"session_id": r.session["session_id"]}
 
 
 # FASTAPI \docs OAuth
