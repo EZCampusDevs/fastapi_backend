@@ -35,7 +35,7 @@ if not load_dotenv_result:
     raise Exception("Failed to load .env file!")
 
 from app.general_exceptions import API_404_USER_NOT_FOUND
-from app.routes import r_download_ics, r_experimental, r_google_api, r_schedule_optimizer
+from app.routes import r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer
 from auth import manager
 from py_core import logging_util
 from py_core.classes.user_classes import BasicUser
@@ -56,7 +56,7 @@ app.add_middleware(
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_secret_key"))
 
 # FastAPI app routers:
-app.include_router(r_download_ics.router)
+app.include_router(r_download_calendar.router)
 app.include_router(r_experimental.router)
 app.include_router(r_google_api.router)
 app.include_router(r_schedule_optimizer.router)
