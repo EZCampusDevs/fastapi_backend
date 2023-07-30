@@ -12,10 +12,13 @@ ezcampus_venv
 ####################################################################################################
 # Project specific / langauge unspecific section of the .gitignore
 ####################################################################################################
-# logs
+# Logs
 .log
 *.log
 *.log.*
+
+# app/cache/ directory
+app/cache/
 
 # Google API client credentials .json file
 client_secret*.json
