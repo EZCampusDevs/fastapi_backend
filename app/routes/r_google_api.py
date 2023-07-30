@@ -9,6 +9,11 @@ from dotenv import load_dotenv
 from fastapi import APIRouter
 from google_auth_oauthlib.flow import Flow
 
+#Jason's recent imports (Remove as you wish)
+from pydantic import BaseModel
+from typing import List
+
+
 logger = logging.getLogger(__name__)
 
 load_dotenv()
@@ -26,7 +31,7 @@ SCOPES = [
 flow = Flow.from_client_secrets_file(
     client_secrets_file=os.getenv("google_client_credentials"),
     scopes=SCOPES,
-    redirect_uri="http://localhost:8000/google-api/auth/callback",
+    redirect_uri="http://localhost:3000/google-auth-callback",
 )
 
 
@@ -38,10 +43,18 @@ def start_auth():
     return {"authorization_url": authorization_url}
 
 
-@router.get("/auth/callback")
-def auth_callback(code: str, state: str):
+class GoogleCalendar_CB_Req(BaseModel):
+    code: str
+    cdis : list[int]
+
+@router.post("/auth/callback")
+def auth_callback(req: GoogleCalendar_CB_Req):
+
+    code = req.code
+    courseDataIds = req.cdis
+
     """Google OAuth2 Callback for Calendar Event exporting"""
-    flow.fetch_token(code=code)
+    flow.fetch_token(code=req.code)
     credentials = flow.credentials  # Load credentials from the json.
 
     c_json = credentials.to_json()
@@ -60,11 +73,11 @@ def auth_callback(code: str, state: str):
         "location": "800 Howard St., San Francisco, CA 94103",
         "description": "A chance to hear more about Google's developer products.",
         "start": {
-            "dateTime": "2023-07-28T09:00:00-07:00",
+            "dateTime": "2023-07-31T09:00:00-07:00",
             "timeZone": "America/Los_Angeles",
         },
         "end": {
-            "dateTime": "2023-07-28T17:00:00-07:00",
+            "dateTime": "2023-07-31T17:00:00-07:00",
             "timeZone": "America/Los_Angeles",
         },
     }
@@ -80,6 +93,10 @@ def auth_callback(code: str, state: str):
         logging.debug(
             f"Successfully created Google Calendar event: {(response.json().get('htmlLink'))}"
         )
+        print("#"*10)
+        print("got CDIS: "+str(courseDataIds))
+        print("#"*10)
+        logging.debug(str(courseDataIds))
     else:
         logging.error(f"Failed to create Google Calendar event: {response.content}")
     return {"message": "success", "credentials": credentials.to_json()}
