@@ -5,8 +5,8 @@ Config objects' universal event attributes are utilized to generate universal ev
 
 from uuid import uuid4
 
-from cache_path_manipulation import get_cache_path
-from constants import BASE_ICS_FILENAME
+from app.cache_path_manipulation import get_cache_path
+from app.constants import BASE_ICS_FILENAME
 from py_core.classes.course_class import Course, course_to_extended_meetings
 from py_core.classes.extended_meeting_class import ExtendedMeeting
 
@@ -52,7 +52,7 @@ def __build_from_ex_meeting(ex_mt: ExtendedMeeting) -> str:
         ex_mt: ExtendedMeeting to translate.
 
     Returns:
-        Translated icalendar.Event.
+        Translated ics VEVENT string.
     """
     return (
         f"BEGIN:VEVENT\n"

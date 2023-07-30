@@ -9,8 +9,8 @@ from starlette.background import BackgroundTask
 
 from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
+from app.export.ics_manipulation import create_ics_calendar
 from app.export.notion_csv_manipulation import create_notion_csv
-from app.ics_manipulation import create_ics_calendar
 from py_core.db.course import get_courses_via
 
 router = APIRouter(prefix="/download", tags=["download"])

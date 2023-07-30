@@ -38,12 +38,12 @@ def get_gcal_event_jsons(source_list: list[ExtendedMeeting | Course]) -> list[st
 
 
 def __build_from_ex_meeting(ex_mt: ExtendedMeeting) -> str:
-    """Translate an ExtendedMeeting to an isc text VEVENT.
+    """Translate an ExtendedMeeting to a json string for Google Calendar exporting.
     Args:
         ex_mt: ExtendedMeeting to translate.
 
     Returns:
-        Translated icalendar.Event.
+        Translated json string.
     """
     rrule_str = str(ex_mt.get_rrule())[str(ex_mt.get_rrule()).index("RRULE:"):]
 
