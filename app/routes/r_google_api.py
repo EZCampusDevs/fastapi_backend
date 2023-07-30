@@ -6,12 +6,13 @@ import os
 
 import requests
 from dotenv import load_dotenv
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Request, status
 from google_auth_oauthlib.flow import Flow
 from pydantic import BaseModel
-from py_core.db.course import get_courses_via
+
 from app import general_exceptions
-from app.gcal_json_manipulation import get_gcal_event_jsons
+from app.export.gcal_json_manipulation import get_gcal_event_jsons
+from py_core.db.course import get_courses_via
 
 logger = logging.getLogger(__name__)
 
