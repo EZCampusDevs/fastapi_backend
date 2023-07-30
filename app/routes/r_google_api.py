@@ -6,13 +6,12 @@ import os
 
 import requests
 from dotenv import load_dotenv
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request, status
 from google_auth_oauthlib.flow import Flow
-
-#Jason's recent imports (Remove as you wish)
 from pydantic import BaseModel
-from typing import List
-
+from py_core.db.course import get_courses_via
+from app import general_exceptions
+from app.gcal_json_manipulation import get_gcal_event_jsons
 
 logger = logging.getLogger(__name__)
 
@@ -43,22 +42,25 @@ def start_auth():
     return {"authorization_url": authorization_url}
 
 
-class GoogleCalendar_CB_Req(BaseModel):
+class RequestGCalExport(BaseModel):
     code: str
-    cdis : list[int]
+    course_data_ids: list[int]
+
 
 @router.post("/auth/callback")
-def auth_callback(req: GoogleCalendar_CB_Req):
-
-    code = req.code
-    courseDataIds = req.cdis
-
+def auth_callback(r: Request, r_model: RequestGCalExport):
     """Google OAuth2 Callback for Calendar Event exporting"""
-    flow.fetch_token(code=req.code)
+    flow.fetch_token(code=r_model.code)
     credentials = flow.credentials  # Load credentials from the json.
 
     c_json = credentials.to_json()
     c_dict = json.loads(c_json)  # Convert JSON string to dictionary.
+
+    if not r_model.course_data_ids:
+        raise general_exceptions.API_400_COURSE_DATA_IDS_UNSPECIFIED
+    courses = get_courses_via(course_data_id_list=r_model.course_data_ids)
+    if not courses:
+        raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
 
     # Prepare header for the request.
     headers = {
@@ -67,36 +69,25 @@ def auth_callback(req: GoogleCalendar_CB_Req):
         "Content-Type": "application/json",
     }
 
+    json_str_event_bodies = get_gcal_event_jsons(courses)
+
     # Prepare the body for the event creation request.
-    event_body = {
-        "summary": "Example Event",
-        "location": "800 Howard St., San Francisco, CA 94103",
-        "description": "A chance to hear more about Google's developer products.",
-        "start": {
-            "dateTime": "2023-07-31T09:00:00-07:00",
-            "timeZone": "America/Los_Angeles",
-        },
-        "end": {
-            "dateTime": "2023-07-31T17:00:00-07:00",
-            "timeZone": "America/Los_Angeles",
-        },
-    }
-
-    # Make the request to create the event.
-    response = requests.post(
-        "https://www.googleapis.com/calendar/v3/calendars/primary/events",
-        headers=headers,
-        data=json.dumps(event_body),  # Event data should be converted to JSON.
-    )
-
-    if response.status_code == 200:
-        logging.debug(
-            f"Successfully created Google Calendar event: {(response.json().get('htmlLink'))}"
+    for body in json_str_event_bodies:
+        # Make the request to create the event(s).
+        response = requests.post(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            headers=headers,
+            data=body,
         )
-        print("#"*10)
-        print("got CDIS: "+str(courseDataIds))
-        print("#"*10)
-        logging.debug(str(courseDataIds))
-    else:
-        logging.error(f"Failed to create Google Calendar event: {response.content}")
-    return {"message": "success", "credentials": credentials.to_json()}
+
+        if response.status_code == status.HTTP_200_OK:
+            logging.debug(
+                f"Successfully created Google Calendar event: {(response.json().get('htmlLink'))}"
+            )
+            logging.debug(
+                f"Successfully created Google Calendar event(s): {r_model.course_data_ids}"
+            )
+        else:
+            logging.error(f"Failed to create Google Calendar event(s): {response.content}")
+
+    return {"message": "completed"}  # , "credentials": credentials.to_json()}
