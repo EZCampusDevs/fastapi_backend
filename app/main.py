@@ -16,12 +16,22 @@ if __package__ is None and not hasattr(sys, "frozen"):
     path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.insert(0, os.path.realpath(path))
 
+
+
 import os
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+
+
+#! Immediately Assert for Loaded .env (Before Importing routes)
+
+load_dotenv_result = load_dotenv()
+
+if not load_dotenv_result:
+    raise Exception("Failed to load .env file!")
 
 from app.general_exceptions import API_404_USER_NOT_FOUND
 from app.routes import r_download_ics, r_experimental, r_schedule_optimizer
@@ -30,7 +40,6 @@ from py_core import logging_util
 from py_core.classes.user_classes import BasicUser
 from py_core.db import init_database
 
-load_dotenv()
 
 app = FastAPI()
 app.add_middleware(
