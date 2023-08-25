@@ -17,7 +17,7 @@ if __package__ is None and not hasattr(sys, "frozen"):
     sys.path.insert(0, os.path.realpath(path))
 
 
-
+import logging
 import os
 import uvicorn
 from dotenv import load_dotenv
@@ -58,7 +58,12 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("session_secret_key")
 # FastAPI app routers:
 app.include_router(r_download_calendar.router)
 app.include_router(r_experimental.router)
-app.include_router(r_google_api.router)
+
+if r_google_api.State.get_google_api():
+    app.include_router(r_google_api.router)
+else:
+    logging.warning("Cannot load r_google_api router")
+
 app.include_router(r_schedule_optimizer.router)
 
 # HTTPExceptions
