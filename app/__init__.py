@@ -188,7 +188,7 @@ def main():
         parsed_args.db_password = str(os.getenv("DB_PASSWORD", "root"))
 
     if not parsed_args.db_username:
-        parsed_args.db_username = str(os.getenv("DB_USERNAME", "test"))
+        parsed_args.db_username = str(os.getenv("DB_USER", "test"))
 
     if not parsed_args.db_port:
         parsed_args.db_port = int(os.getenv("DB_PORT", 3306))
