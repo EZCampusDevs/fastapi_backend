@@ -1,5 +1,8 @@
 """Constants related to app backend computation."""
 
+BRAND = "FastAPI Backend"
+BRAND_LONG = "Scheduleplatform-" + BRAND
+
 # ICS Calendar base file name:
 BASE_ICS_FILENAME = "calendar.ics"
 
