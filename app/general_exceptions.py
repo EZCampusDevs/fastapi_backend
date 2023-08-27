@@ -33,3 +33,8 @@ API_500_ERROR = HTTPException(
     detail="Internal server error. The issue has been logged and will be reviewed by the "
     "development team. Please contact support if you require an urgent response.",
 )
+API_200_AUTHORIZED_USER = HTTPException(status.HTTP_200_OK, "User is authenticated")
+API_200_HEARTBEAT = HTTPException(status.HTTP_200_OK, "I am alive")
+API_401_UNAUTHORIZED_USER = HTTPException(
+    status.HTTP_401_UNAUTHORIZED, "Invalid or expired auth token"
+)
