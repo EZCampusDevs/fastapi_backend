@@ -13,16 +13,16 @@ pipeline {
                         withCredentials([usernamePassword(credentialsId: 'MYSQL_USER_PASS_2', passwordVariable: 'PASSWORD_1', usernameVariable: 'USERNAME_1')]) {
 
                             writeFile file: './.env', text: """
-db_user="${USERNAME_1}" 
-db_pass="${PASSWORD_1}" 
-db_name="ezcampus_db"
-db_port="3306"
-db_host="mysql-instance"
-db_dir="."
+DB_USER="${USERNAME_1}" 
+DB_PASSWORD="${PASSWORD_1}" 
+DB_NAME="ezcampus_db"
+DB_PORT="3306"
+DB_HOST="mysql-instance"
+DB_DIR="."
 DEBUG=0
-fastapi_host="0.0.0.0"
-fastapi_port="8080"
-auth_secret_key="${AUTH_SECRET}"
+FASTAPI_HOST="0.0.0.0"
+FASTAPI_PORT="8080"
+AUTH_SECRET_KEY="${AUTH_SECRET}"
 origins_domain="${ORIGINS_DOMAIN}"
 """
                         }
