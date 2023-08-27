@@ -13,7 +13,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from py_core import logging_util
 from py_core.classes.user_classes import BasicUser
-from py_core.db import init_database
+from py_core import db as database
 
 
 from . auth import MANAGER
@@ -179,19 +179,19 @@ def main():
         logging.debug(parsed_args)
 
     if not parsed_args.db_name:
-        parsed_args.db_name = str(os.getenv("DB_NAME", "ezcampus_db"))
+        parsed_args.db_name = str( database.get_env_db_name("ezcampus_db"))
 
     if not parsed_args.db_host:
-        parsed_args.db_host = str(os.getenv("DB_HOST", "localhost"))
+        parsed_args.db_host = str(database.get_env_db_host("localhost"))
 
     if not parsed_args.db_password:
-        parsed_args.db_password = str(os.getenv("DB_PASSWORD", "root"))
+        parsed_args.db_password = str(database.get_env_db_password("root"))
 
     if not parsed_args.db_username:
-        parsed_args.db_username = str(os.getenv("DB_USER", "test"))
+        parsed_args.db_username = str(database.get_env_db_user("test"))
 
     if not parsed_args.db_port:
-        parsed_args.db_port = int(os.getenv("DB_PORT", 3306))
+        parsed_args.db_port = int(database.get_env_db_port(3306))
         
     if not parsed_args.host:
         parsed_args.host = os.getenv("FASTAPI_HOST", "0.0.0.0")
@@ -207,7 +207,7 @@ def main():
     logging.info(f"Read fastapi host {parsed_args.host}")
     logging.info(f"Read fastapi port {parsed_args.port}")
 
-    init_database(
+    database.init_database(
         use_mysql=True,
         db_port=parsed_args.db_port,
         db_host=parsed_args.db_host,
