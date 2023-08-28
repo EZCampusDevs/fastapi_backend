@@ -18,7 +18,6 @@ if __package__ is None and not hasattr(sys, "frozen"):
 
 
 if __name__ == "__main__":
-
-    import app 
+    import app
 
     sys.exit(app.main())

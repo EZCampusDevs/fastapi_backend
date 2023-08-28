@@ -1,4 +1,4 @@
-import sys 
+import sys
 import logging
 import os
 import datetime
@@ -16,13 +16,13 @@ from py_core.classes.user_classes import BasicUser
 from py_core import db as database
 
 
-from . auth import MANAGER
-from . general_exceptions import *
-from . routes import r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer
+from .auth import MANAGER
+from .general_exceptions import *
+from .routes import r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer
 from . import constants
 
-def parse_int(value, default=-1):
 
+def parse_int(value, default=-1):
     try:
         return int(value)
     except:
@@ -30,21 +30,19 @@ def parse_int(value, default=-1):
 
 
 class EZCampus_App(FastAPI):
-    
-    INSTANCE : "EZCampus_App" = None
+    INSTANCE: "EZCampus_App" = None
 
     def __init__(self):
         FastAPI.__init__(self)
-        
+
         if EZCampus_App.INSTANCE is not None:
-            
             raise Exception(f"{self.__class__.__name__} is a singleton!")
 
         EZCampus_App.INSTANCE = self
-        
+
         logging.info("Initializing FastAPI")
         logging.info("Loading middleware...")
-        
+
         self.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],
@@ -52,10 +50,7 @@ class EZCampus_App(FastAPI):
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        self.add_middleware(
-            SessionMiddleware, 
-            secret_key=os.getenv("session_secret_key")
-            )
+        self.add_middleware(SessionMiddleware, secret_key=os.getenv("session_secret_key"))
 
         logging.info("Adding routers...")
 
@@ -68,7 +63,6 @@ class EZCampus_App(FastAPI):
         else:
             logging.warning("Cannot load r_google_api router")
 
-        
         logging.info("Adding routes")
         self.add_api_route("/", self.heartbeat, methods=["GET"])
         self.add_api_route("/heartbeat", self.heartbeat, methods=["GET"])
@@ -77,10 +71,8 @@ class EZCampus_App(FastAPI):
         self.add_api_route("/homepage", self.homepage, methods=["GET"])
 
         logging.info("FastAPI ready")
-        
-        
-    def add_router(self, router):
 
+    def add_router(self, router):
         logging.info(f"Adding router: {router}")
 
         self.include_router(router)
@@ -103,12 +95,11 @@ class EZCampus_App(FastAPI):
             r.session["session_id"] = token_hex(16)  # You can adjust the length of the session ID.
         return {"session_id": r.session["session_id"]}
 
-
     async def homepage(self, user: BasicUser = Depends(MANAGER)) -> dict:
         if user is None:
             raise API_404_USER_NOT_FOUND
         return {"valid": user.name}
-    
+
 
 def get_and_prase_args(args):
     import argparse
@@ -134,41 +125,47 @@ def get_and_prase_args(args):
     general.add_argument("-d", "--host", dest="host", help="The FastAPI host")
     general.add_argument("-i", "--port", dest="port", help="The FastAPI port")
 
-    general.add_argument("-L", "--loglevel", dest="log_level", help=f"Set the log level, {logging_util.get_level_map_pretty()}")
-    general.add_argument("-f", "--logfile", dest="log_file", help="Set the NAME of the logfile, will be put in the log directory")
+    general.add_argument(
+        "-L",
+        "--loglevel",
+        dest="log_level",
+        help=f"Set the log level, {logging_util.get_level_map_pretty()}",
+    )
+    general.add_argument(
+        "-f",
+        "--logfile",
+        dest="log_file",
+        help="Set the NAME of the logfile, will be put in the log directory",
+    )
     general.add_argument("-D", "--logdir", dest="log_dir", help="Set the log directroy")
 
     return parser.parse_args(args)
 
 
-
 def main():
-
     load_dotenv()
 
     parsed_args = get_and_prase_args(sys.argv[1:])
-    
-    time = datetime.datetime.strftime( datetime.datetime.now(), "%Y-%m-%d_%H-%M-%S")
-    
+
+    time = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H-%M-%S")
+
     log_dir = parsed_args.log_dir or os.getenv("LOG_DIR", "./logs")
     log_file = parsed_args.log_file or os.getenv("LOG_FILE", f"{constants.BRAND}{time}.log")
     log_path = os.path.join(log_dir, log_file)
-    
+
     log_level = parsed_args.log_level or os.getenv("LOG_LEVEL", str(logging.INFO))
     log_level = parse_int(log_level, -1)
-    
-    assert log_level in logging_util.LOG_LEVEL_MAP, f"Unknown log level {log_level}"
 
+    assert log_level in logging_util.LOG_LEVEL_MAP, f"Unknown log level {log_level}"
 
     logging_util.setup_logging(log_file=log_path, log_level=log_level)
     logging_util.add_unhandled_exception_hook()
-    
+
     logging.info("Starting...")
     logging.info(f"--- {constants.BRAND} ---")
     logging.info(f"--- {len(constants.BRAND) * ' '} ---")
     logging.info(f"Date Time: {time}")
     logging.info(f"Logging to {log_path}")
-
 
     if parsed_args.db_password:
         _ = parsed_args.db_password
@@ -179,7 +176,7 @@ def main():
         logging.debug(parsed_args)
 
     if not parsed_args.db_name:
-        parsed_args.db_name = str( database.get_env_db_name("ezcampus_db"))
+        parsed_args.db_name = str(database.get_env_db_name("ezcampus_db"))
 
     if not parsed_args.db_host:
         parsed_args.db_host = str(database.get_env_db_host("localhost"))
@@ -192,7 +189,7 @@ def main():
 
     if not parsed_args.db_port:
         parsed_args.db_port = int(database.get_env_db_port(3306))
-        
+
     if not parsed_args.host:
         parsed_args.host = os.getenv("FASTAPI_HOST", "0.0.0.0")
 
@@ -217,10 +214,10 @@ def main():
         create=True,
         check_env=False,
     )
-    
+
     EZCampus_App()
 
     logging.debug(EZCampus_App.INSTANCE)
     logging.info(f"Running FastAPI on host: {parsed_args.host} with port: {parsed_args.port}")
-    
+
     uvicorn.run(EZCampus_App.INSTANCE, host=parsed_args.host, port=parsed_args.port)

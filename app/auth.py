@@ -22,7 +22,7 @@ if _secret is None:
     logging.error(msg)
     raise Exception(msg)
 
-MANAGER :LoginManager= LoginManager(secret=_secret, token_url="/auth/token", use_cookie=True)
+MANAGER: LoginManager = LoginManager(secret=_secret, token_url="/auth/token", use_cookie=True)
 
 
 def verify_password(password: str, hashed_password: str) -> bool:
