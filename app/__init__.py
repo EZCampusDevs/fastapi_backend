@@ -189,12 +189,16 @@ def main():
 
     if not parsed_args.db_port:
         parsed_args.db_port = int(database.get_env_db_port(3306))
+    else:
+        parsed_args.db_port = int(parsed_args.db_port)
 
     if not parsed_args.host:
         parsed_args.host = os.getenv("FASTAPI_HOST", "0.0.0.0")
 
     if not parsed_args.port:
         parsed_args.port = int(os.getenv("FASTAPI_PORT", 8000))
+    else:
+        parsed_args.port = int(parsed_args.port)
 
     logging.info(f"Read db hostname {parsed_args.db_host}")
     logging.info(f"Read db port {parsed_args.db_port}")
