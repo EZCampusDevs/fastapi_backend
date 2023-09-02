@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
 
 from app import general_exceptions
+from app.schedule_optimizer import course_level_optimizer
+from py_core.classes.extended_meeting_class import http_format
 from py_core.classes.optimizer_criteria_class import CourseOptimizerCriteria
 from py_core.db.course import get_courses_via
-from app.schedule_optimizer import course_level_optimizer
 
 router = APIRouter(prefix="/optimizer", tags=["optimizer"])
 
@@ -43,7 +44,7 @@ class RequestRestrictions(BaseModel):
     course_codes: list[str]
 
 
-@router.post("/ics/courses")
+@router.post("/schedule")
 async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
     """Download ics file based on given course_data_ids.
 
@@ -62,9 +63,7 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
         if not courses:
             raise general_exceptions.API_404_COURSE_IDS_NOT_FOUND
         # Process required course_data_ids.
-        required_courses = get_courses_via(
-            course_data_id_list=r_model.required_course_data_ids
-        )
+        required_courses = get_courses_via(course_data_id_list=r_model.required_course_data_ids)
         if r_model.required_course_data_ids and not required_courses:
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
         # Optimize.
@@ -76,7 +75,7 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
             ensure_restrictions_met=r_model.ensure_restrictions_met,
             restrictions_met=r_model.restrictions_met,
         )
-        raise HTTPException(status_code=status.HTTP_200_OK, detail=result)
+        result["schedule"] = http_format(result["schedule"])  # Convert for HTTP safe raise.
     except HTTPException as h:
         # TODO: LOG
         #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
@@ -85,6 +84,7 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
         h = general_exceptions.API_500_ERROR
         # TODO: LOG
         #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
-        raise h
+    #     raise h
     # TODO: LOG
     #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
+    raise HTTPException(status_code=status.HTTP_200_OK, detail=result)
