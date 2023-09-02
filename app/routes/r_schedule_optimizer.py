@@ -55,6 +55,14 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
     Returns:
         Download for the created ics calendar file.
     """
+    result = {
+        "schedule": [],
+        "confidence": 1,
+        "possible_combinations": 0,
+        "simplified_manifest": [],
+        "crns": [],
+    }
+
     try:
         # Process course_ids.
         if not r_model.course_ids:
