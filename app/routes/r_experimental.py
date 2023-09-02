@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app import general_exceptions
 from py_core.classes.course_class import course_to_extended_meetings
 from py_core.db.course import get_courses_via
+from py_core.classes.extended_meeting_class import http_format
 
 router = APIRouter(prefix="/experimental", tags=["experimental"])
 
@@ -48,24 +49,4 @@ async def events_example(r: Request, r_model: RequestEvents):
     # TODO: LOG
     #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
 
-    conv = [
-        {
-            "location": mt.location,
-            "name": mt.name,
-            "description": mt.description,
-            "seats_filled": mt.seats_filled,
-            "max_capacity": mt.max_capacity,
-            "is_virtual": mt.is_virtual,
-            "colour": mt.colour,
-            "time_start": mt.time_start,
-            "time_end": mt.time_end,
-            "rrulejs_str": (
-                mt.get_ics_rrule_str()[: mt.get_ics_rrule_str().index("DTEND;")]
-                + mt.get_ics_rrule_str()[mt.get_ics_rrule_str().index("DTEND;") :][
-                    mt.get_ics_rrule_str().index("\n") - 1 :
-                ]
-            ).replace("\nRRULE:", ";\nRRULE:"),
-        }
-        for mt in ex_mts
-    ]
-    return HTTPException(status.HTTP_200_OK, conv)
+    return HTTPException(status.HTTP_200_OK, http_format(ex_mts))
