@@ -8,6 +8,7 @@ from app.schedule_optimizer import course_level_optimizer
 from py_core.classes.extended_meeting_class import http_format
 from py_core.classes.optimizer_criteria_class import CourseOptimizerCriteria
 from py_core.db.course import get_courses_via
+from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/optimizer", tags=["optimizer"])
 
@@ -55,14 +56,6 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
     Returns:
         Download for the created ics calendar file.
     """
-    result = {
-        "schedule": [],
-        "confidence": 1,
-        "possible_combinations": 0,
-        "simplified_manifest": [],
-        "crns": [],
-    }
-
     try:
         # Process course_ids.
         if not r_model.course_ids:
@@ -85,14 +78,12 @@ async def schedule_optimizer(r: Request, r_model: RequestScheduleOptimizer):
         )
         result["schedule"] = http_format(result["schedule"])  # Convert for HTTP safe raise.
     except HTTPException as h:
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
+        log_endpoint(h, r, f"detail={h.detail} r_model={r_model}")
         raise h
-    except Exception:  # All other python errors are cast and logged as 500.
+    except Exception as e:  # All other python errors are cast and logged as 500.
         h = general_exceptions.API_500_ERROR
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
-    #     raise h
-    # TODO: LOG
-    #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
-    raise HTTPException(status_code=status.HTTP_200_OK, detail=result)
+        log_endpoint(h, r, f"detail={h.detail} e={e} r_model={r_model}")
+        raise h
+    h = HTTPException(status_code=status.HTTP_200_OK, detail=result)
+    log_endpoint(h, r, f"r_model={r_model}")
+    raise h
