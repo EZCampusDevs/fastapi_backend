@@ -4,6 +4,7 @@ cache_id or similar verbiage is used to describe a cache key value used to ident
 file. For example, it might be the unique identifier for a user's generated ics file.
 """
 
+from uuid import uuid4
 import errno
 import os
 
@@ -36,6 +37,10 @@ def get_cache_path(file_name: str, cache_id: str = None) -> str:
     Returns:
         File path.
     """
+    # Default a cache id if one does not exist or is invalid.
+    if not isinstance(cache_id, str) or cache_id is None:
+        cache_id = str(uuid4())
+
     __ensure_file_path_exists(CACHE_DIR)
     path, extension = os.path.splitext(file_name)
     combined_path = f"{CACHE_DIR}{path}{cache_id if isinstance(cache_id, str) else ''}{extension}"

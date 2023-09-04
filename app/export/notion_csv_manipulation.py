@@ -5,8 +5,6 @@ import csv
 Config objects' universal event attributes are utilized to generate universal events.
 """
 
-from uuid import uuid4
-
 from app.cache_path_manipulation import get_cache_path
 from app.constants import BASE_NOTION_CSV_FILENAME
 from py_core.classes.course_class import Course, course_to_extended_meetings
@@ -37,8 +35,7 @@ def create_notion_csv(source_list: list[ExtendedMeeting | Course]) -> str:
         else:
             raise TypeError(f"Expected type ExtendedMeeting or Course, received {type(source)}")
 
-    file_path = get_cache_path(file_name=BASE_NOTION_CSV_FILENAME, cache_id=str(uuid4()))
-
+    file_path = get_cache_path(file_name=BASE_NOTION_CSV_FILENAME)
     with open(file_path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(csv_rows)
