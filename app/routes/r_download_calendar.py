@@ -12,6 +12,7 @@ from app.cache_path_manipulation import remove_file_path
 from app.export.ics_manipulation import create_ics_calendar
 from app.export.notion_csv_manipulation import create_notion_csv
 from py_core.db.course import get_courses_via
+from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/download", tags=["download"])
 
@@ -39,24 +40,22 @@ async def courses_download(r: Request, r_model: RequestDownloadCourses) -> FileR
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
         file_path = create_ics_calendar(source_list=courses)
     except HTTPException as h:
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
+        log_endpoint(h, r, f"detail={h.detail} r_model={r_model}")
         raise h
     except Exception as e:  # All other python errors are cast and logged as 500.
         h = general_exceptions.API_500_ERROR
-        print(e)
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
+        log_endpoint(h, r, f"detail={h.detail} e={e} r_model={r_model}")
         raise h
-    # TODO: LOG
-    #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
 
-    return FileResponse(
+    h = FileResponse(
         status_code=200,
         path=file_path,
         filename=f"courses_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.ics",
         media_type="text/calendar",
         background=BackgroundTask(remove_file_path, file_path),
     )
+    log_endpoint(h, r, f"r_model={r_model}")
+    return h
 
 
 @router.post("/csv/courses")
@@ -78,21 +77,19 @@ async def notion_courses_download(r: Request, r_model: RequestDownloadCourses) -
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
         file_path = create_notion_csv(source_list=courses)
     except HTTPException as h:
-        # TODO: LOG
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
+        log_endpoint(h, r, f"detail={h.detail} r_model={r_model}")
         raise h
     except Exception as e:  # All other python errors are cast and logged as 500.
         h = general_exceptions.API_500_ERROR
-        print(e)
-        #  new_log(http_ref=h, request_model=r_model, request=r)  # Log error.
+        log_endpoint(h, r, f"detail={h.detail} e={e} r_model={r_model}")
         raise h
-    # TODO: LOG
-    #  new_log(http_ref=200, request_model=r_model, request=r)  # Log success.
 
-    return FileResponse(
+    h = FileResponse(
         status_code=200,
         path=file_path,
         filename=f"courses_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv",
         media_type="text/csv",
         background=BackgroundTask(remove_file_path, file_path),
     )
+    log_endpoint(h, r, f"r_model={r_model}")
+    return h
