@@ -3,8 +3,6 @@
 Config objects' universal event attributes are utilized to generate universal events.
 """
 
-from uuid import uuid4
-
 from app.cache_path_manipulation import get_cache_path
 from app.constants import BASE_ICS_FILENAME
 from py_core.classes.course_class import Course, course_to_extended_meetings
@@ -38,7 +36,7 @@ def create_ics_calendar(source_list: list[ExtendedMeeting | Course]) -> str:
                 f"Expected type ExtendedMeeting or Course, received {type(source)}"
             )
 
-    file_path = get_cache_path(file_name=BASE_ICS_FILENAME, cache_id=str(uuid4()))
+    file_path = get_cache_path(file_name=BASE_ICS_FILENAME)
     with open(file_path, "w") as f:
         f.write(
             f"BEGIN:VCALENDAR\n" f"PRODID:EZCampus\n" f"{events_text}" f"END:VCALENDAR"
