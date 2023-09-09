@@ -216,7 +216,6 @@ def main():
         db_user=parsed_args.db_username,
         db_pass=parsed_args.db_password,
         create=True,
-        check_env=False,
     )
 
     EZCampus_App()
