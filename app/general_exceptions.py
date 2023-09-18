@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 EZCampus 
+# Copyright (C) 2022-2023 EZCampus
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -49,7 +49,14 @@ API_500_ERROR = HTTPException(
     "development team. Please contact support if you require an urgent response.",
 )
 API_200_AUTHORIZED_USER = HTTPException(status.HTTP_200_OK, "User is authenticated")
-API_200_HEARTBEAT = HTTPException(status.HTTP_200_OK, "I am alive")
+API_200_HEARTBEAT = HTTPException(
+    status.HTTP_200_OK,
+    (
+        "EZCampus FastAPI Backend: Online"
+        "License: https://www.gnu.org/licenses/agpl-3.0.html"
+        "Source: https://github.com/EZCampusDevs/fastapi_backend/"
+    ),
+)
 API_401_UNAUTHORIZED_USER = HTTPException(
     status.HTTP_401_UNAUTHORIZED, "Invalid or expired auth token"
 )
