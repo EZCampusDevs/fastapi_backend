@@ -24,5 +24,10 @@ BASE_ICS_FILENAME = "calendar.ics"
 # Notion CSV Calendar/Database file name:
 BASE_NOTION_CSV_FILENAME = "notion_csv.csv"
 
+# Student Availability Heatmap files
+HEATMAP_CSV = "ezcampus_heatmap.csv"
+HEATMAP_XLSX = "ezcampus_heatmap.xlsx"
+HEATMAP_XLSX_DEFAULT_SHEET = "Heatmap"
+
 # Cache directory:
 CACHE_DIR = "cache/"
