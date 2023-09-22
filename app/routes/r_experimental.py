@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""""ICS download API endpoint routes."""
+""""Experimental endpoints."""
 
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel
