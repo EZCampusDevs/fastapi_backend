@@ -27,7 +27,7 @@ from pydantic import BaseModel
 
 from app import general_exceptions
 from app.export.gcal_json_manipulation import get_gcal_event_jsons
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 
 logger = logging.getLogger(__name__)
 
