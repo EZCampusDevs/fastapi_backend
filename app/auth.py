@@ -50,7 +50,7 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 @MANAGER.user_loader()
 def load_user(username: str) -> json:
-    user = get_users_via(usernames=[username])[0]
+    user = get_users_via(usernames=[username])
     if user is None or not user:
         return
-    return user
+    return user[0]
