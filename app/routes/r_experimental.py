@@ -20,7 +20,7 @@ from pydantic import BaseModel
 
 from app import general_exceptions
 from py_core.classes.course_class import course_to_extended_meetings
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 from py_core.classes.extended_meeting_class import http_format
 
 router = APIRouter(prefix="/experimental", tags=["experimental"])

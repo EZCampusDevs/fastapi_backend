@@ -22,7 +22,7 @@ from app import general_exceptions
 from app.schedule_optimizer import course_level_optimizer
 from py_core.classes.extended_meeting_class import http_format
 from py_core.classes.optimizer_criteria_class import CourseOptimizerCriteria
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/optimizer", tags=["optimizer"])

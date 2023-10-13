@@ -26,7 +26,7 @@ from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
 from app.export.ics_manipulation import create_ics_calendar
 from app.export.notion_csv_manipulation import create_notion_csv
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/download", tags=["download"])
