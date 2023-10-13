@@ -22,7 +22,7 @@ from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import general_exceptions
-from py_core.classes.user_classes import BasicUser
+from py_core.classes.user_classes import BasicUser, verify_password
 from py_core.user import add_users
 
 router = APIRouter(prefix="/user", tags=["user"])
@@ -75,7 +75,7 @@ async def login(r: Request, data: OAuth2PasswordRequestForm = Depends()):
     if user is None:
         raise general_exceptions.API_404_USER_NOT_FOUND
 
-    if not auth.verify_password(password=data.password, hashed_password=user.password):
+    if not verify_password(password=data.password, hashed_password=user.password):
         raise API_403_LOGIN_DENY
 
     access_token = auth.MANAGER.create_access_token(

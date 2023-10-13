@@ -18,13 +18,10 @@
 Note: hash_password() function found in the user class module!
 """
 
-import base64
-import hashlib
 import json
 import os
 import logging
 
-import bcrypt
 from fastapi_login import LoginManager
 from py_core.user import get_users_via
 
@@ -39,13 +36,6 @@ if _secret is None:
     raise Exception(msg)
 
 MANAGER: LoginManager = LoginManager(secret=_secret, token_url="/auth/token", use_cookie=True)
-
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    if isinstance(password, str):
-        password = password.encode()
-    check_hash = base64.b64encode(hashlib.sha256(password).digest())
-    return bcrypt.checkpw(check_hash, hashed_password.encode())
 
 
 @MANAGER.user_loader()
