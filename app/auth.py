@@ -26,6 +26,7 @@ import logging
 
 import bcrypt
 from fastapi_login import LoginManager
+from py_core.user import get_users_via
 
 
 _AUTH_SECRET_KEY_NAME = "AUTH_SECRET_KEY"
@@ -48,9 +49,8 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 
 @MANAGER.user_loader()
-def load_user(user_query: str) -> json:
-    # user = users.auth_search_user(user_query)
-    user = None
-    if user is None:
+def load_user(username: str) -> json:
+    user = get_users_via(usernames=[username])[0]
+    if user is None or not user:
         return
     return user
