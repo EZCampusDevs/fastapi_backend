@@ -26,7 +26,7 @@ from app.cache_path_manipulation import get_cache_path
 from constants import HEATMAP_CSV, HEATMAP_XLSX, HEATMAP_XLSX_DEFAULT_SHEET
 from py_core.classes.course_class import Course, course_to_extended_meetings
 from py_core.classes.extended_meeting_class import ExtendedMeeting, to_single_occurrences
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 
 all_course_objects = get_courses_via(course_id_list=[])
 

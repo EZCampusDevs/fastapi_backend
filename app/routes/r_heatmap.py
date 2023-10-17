@@ -26,7 +26,7 @@ from datetime import date
 from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
 from app.student_availability import generate_heatmap
-from py_core.db.course import get_courses_via
+from py_core.course import get_courses_via
 from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/heatmap", tags=["heatmap"])
