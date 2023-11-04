@@ -61,6 +61,30 @@ def API_404_CRN_NOT_FOUND(invalid_crns: list[int]):
     )
 
 
+@router.get("/info")
+async def self_info(r: Request, user: BasicUser = Depends(auth.MANAGER)):
+    """Get user info via username. LOGGING ENABLED.
+
+    Args:
+        r: fastapi.Request object.
+        user: Logged-in user.
+    """
+    try:
+        if user is None:
+            raise general_exceptions.API_404_USER_NOT_FOUND
+
+    except HTTPException as h:
+        # TODO: log
+        raise h
+
+    except Exception:  # All other python errors are cast and logged as 500.
+        h = general_exceptions.API_500_ERROR
+        # TODO: log
+        raise h
+
+    return user
+
+
 @router.post("/login")
 async def login(r: Request, data: OAuth2PasswordRequestForm = Depends()):
     """User login. LOGGING ENABLED.
