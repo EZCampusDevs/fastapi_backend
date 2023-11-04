@@ -33,7 +33,8 @@ from py_core import db as database
 
 from .auth import MANAGER, load_user
 from .general_exceptions import *
-from .routes import r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer, r_user
+from .routes import (r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer,
+                     r_user, r_fyic2023)
 from . import constants
 
 
@@ -73,6 +74,7 @@ class EZCampus_App(FastAPI):
         self.add_router(r_experimental.router)
         self.add_router(r_schedule_optimizer.router)
         self.add_router(r_user.router)
+        self.add_router(r_fyic2023.router)
 
         if r_google_api.State.get_google_api():
             self.add_router(r_google_api.router)
