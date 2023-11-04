@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 EZCampus 
+# Copyright (C) 2022-2023 EZCampus
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published
@@ -24,14 +24,14 @@ from secrets import token_hex
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from starlette.middleware.sessions import SessionMiddleware
 
 from py_core import logging_util
-from py_core.classes.user_classes import BasicUser
+from py_core.classes.user_classes import BasicUser, verify_password
 from py_core import db as database
 
-
-from .auth import MANAGER
+from .auth import MANAGER, load_user
 from .general_exceptions import *
 from .routes import r_download_calendar, r_experimental, r_google_api, r_schedule_optimizer, r_user
 from . import constants
@@ -83,6 +83,7 @@ class EZCampus_App(FastAPI):
         self.add_api_route("/", self.heartbeat, methods=["GET"])
         self.add_api_route("/heartbeat", self.heartbeat, methods=["GET"])
         self.add_api_route("/root", self.root, methods=["GET"])
+        self.add_api_route("/auth/token", self.docs_auth_token_login, methods=["POST"])
         self.add_api_route("/session-id", self.session_id, methods=["GET"])
         self.add_api_route("/homepage", self.homepage, methods=["GET"])
 
@@ -100,6 +101,22 @@ class EZCampus_App(FastAPI):
         if user is None:
             raise API_401_UNAUTHORIZED_USER
         raise API_200_AUTHORIZED_USER
+
+    async def docs_auth_token_login(self, form_data: OAuth2PasswordRequestForm = Depends()):
+        """Auth / Login endpoint match for Swagger Docs UI"""
+        user = load_user(form_data.username)
+
+        if user is None:
+            raise API_404_USER_NOT_FOUND
+
+        if not verify_password(password=form_data.password, hashed_password=user.password):
+            raise API_401_UNAUTHORIZED_USER
+
+        access_token = MANAGER.create_access_token(
+            data={"sub": user.username}, expires=datetime.timedelta(days=1)
+        )
+
+        return {"access_token": access_token, "token_type": "bearer"}
 
     async def session_id(self, r: Request):
         """Generate session id based on SessionMiddleware JWT.
