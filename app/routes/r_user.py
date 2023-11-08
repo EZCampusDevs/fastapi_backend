@@ -73,6 +73,24 @@ async def self_info(r: Request, user: BasicUser = Depends(auth.MANAGER)):
         if user is None:
             raise general_exceptions.API_404_USER_NOT_FOUND
 
+        # TODO (py_core issue #12): The following is a patch fix for fastapi_backend issue #14. The
+        #  code below should be moved into a function in py_core's `user_classes.py`, something
+        #  along the lines of `outbound_data(user: BasicUser)`.
+        outbound_data_dict = {
+            "username": user.username,
+            "email": user.email,
+            "name": user.name,
+            "description": user.description,
+            "school_short_name": user.school_short_name,
+            "program": user.program,
+            "year_of_study": user.year_of_study,
+            "is_private": user.is_private,
+            "is_suspended": user.is_suspended,
+            "account_status": user.account_status,
+            "schedule_tag": user.schedule_tag,
+            "created_at": user.created_at,
+        }
+
     except HTTPException as h:
         # TODO: log
         raise h
@@ -82,7 +100,7 @@ async def self_info(r: Request, user: BasicUser = Depends(auth.MANAGER)):
         # TODO: log
         raise h
 
-    return user
+    return outbound_data_dict
 
 
 @router.post("/login")
