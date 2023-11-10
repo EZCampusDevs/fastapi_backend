@@ -25,20 +25,27 @@ from py_core.classes.extended_meeting_class import ExtendedMeeting
 from py_core.classes.extended_meeting_class import http_format
 from py_core.logging_util import log_endpoint
 
+# BAD PRACTICE CODE CALLS
+from datetime import date
+from py_core.db import SessionObj
+from py_core.db import db_globals as DG
+from py_core.db import db_tables as DT
+
 router = APIRouter(prefix="/fyic2023", tags=["fyic2023"])
 
 
 class ConferenceStream(str, Enum):
-    Leadership = "Leadership"
-    Sustainability = "Sustainability"
-    Vpx = "VPX"
+    Leadership = "Leadership"  # 3
+    Sustainability = "Sustainability"  # 4
+    Vpx = "VPX"  # 5
 
 
 class ConferenceInfoStream(BaseModel):
     stream: ConferenceStream
 
 
-# TODO(Daniel): Move to DB.
+# FYIC Events
+"""
 general_events = [
     ExtendedMeeting(
         name="Check-in & Snacks",
@@ -683,18 +690,74 @@ stream3_events = [
         location="SIRC 3110",
     ),
 ]
+"""
+
+
+# ########## START OF BAD PRACTICE CODE / PATCH ##########
+# THIS IS BAD PRACTICE, URGENT PATCH FOR FYIC DUE TO RELATED EFFECTS OF py_core ISSUE #13.
+# CODE BASED OFF def get_users_via( ... IN py_core user.py.
+def get_fyic_events_via_colour(colour: list[int] | None = None) -> list[ExtendedMeeting]:
+    if colour is None or not colour:
+        return []
+
+    session: SessionObj
+    try:
+        with DG.Session.begin() as session:
+            result = session.query(DT.TBL_Event).filter(
+                DT.TBL_Event.color.in_(colour),
+            )
+            return [
+                ExtendedMeeting(
+                    time_start=r.begin_time,
+                    time_end=r.end_time,
+                    date_start=r.started_at,
+                    date_end=r.ended_at,
+                    timezone_str=r.timezone,
+                    occurrence_unit=r.occurrence_unit,
+                    occurrence_interval=r.occurrence_interval,
+                    occurrence_limit=(
+                        r.occurrence_until
+                        if isinstance(r.occurrence_until, date)
+                        else r.occurrence_repeat  # int based limit.
+                    ),
+                    days_of_week=r.days_of_week,
+                    location=r.location,
+                    name=r.name,
+                    description=r.description,
+                    seats_filled=r.seats_filled,
+                    max_capacity=r.max_capacity,
+                    is_virtual=r.is_virtual,
+                    colour=None,  # Override colour (due to pycore issue #13).
+                )
+                for r in result
+            ]
+    except AttributeError as e:
+        msg = e.args[0]
+        if "'NoneType' object has no attribute 'begin'" in msg:
+            raise RuntimeWarning(
+                f"{msg} <--- Daniel: Check (local / ssh) connection to DB, possible missing "
+                f"init_database() call via 'from py_core.db import init_database'"
+            )
+        else:
+            raise e
+    except Exception as e:
+        raise e
+
+
+# ########## END OF BAD PRACTICE CODE / PATCH ##########
 
 
 @router.post("/events")
 async def events(r: Request, r_model: ConferenceInfoStream):
+    general_events = get_fyic_events_via_colour([1])
     all_events = general_events.copy()
 
     if r_model.stream == ConferenceStream.Vpx:
-        all_events += stream3_events
+        all_events += get_fyic_events_via_colour([5])
     elif r_model.stream == ConferenceStream.Sustainability:
-        all_events += stream2_events
+        all_events += get_fyic_events_via_colour([4])
     else:  # r_model.stream == ConferenceStream.Leadership
-        all_events += stream1_events
+        all_events += get_fyic_events_via_colour([3])
 
     formatted = http_format(all_events)
     h = HTTPException(status.HTTP_200_OK, formatted)
