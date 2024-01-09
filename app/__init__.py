@@ -33,7 +33,7 @@ from py_core import db as database
 
 from .auth import MANAGER, load_user
 from .general_exceptions import *
-from .routes import (r_download_calendar, r_experimental, r_schedule_optimizer, r_user, r_fyic2023)
+from .routes import (r_download_calendar, r_experimental, r_schedule_optimizer, r_user)
 from . import constants
 
 
@@ -73,7 +73,6 @@ class EZCampus_App(FastAPI):
         self.add_router(r_experimental.router)
         self.add_router(r_schedule_optimizer.router)
         self.add_router(r_user.router)
-        self.add_router(r_fyic2023.router)
 
         logging.info("Adding routes")
         self.add_api_route("/", self.heartbeat, methods=["GET"])
