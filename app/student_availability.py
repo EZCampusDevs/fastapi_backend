@@ -91,21 +91,26 @@ def generate_heatmap(
 
     # Iterate over the events and update the calc array.
     for ex_mt in single_ex_mts:
-        day_start_idx = (ex_mt.date_start - scope_date_start).days
-        day_end_idx = (ex_mt.date_end - scope_date_start).days
+        if (
+            scope_date_start <= ex_mt.date_start <= scope_date_end
+            or scope_date_start <= ex_mt.date_end <= scope_date_end
+        ):  # Only process if within the scope dates.
+            # Calculating start and end date indexes.
+            day_start_idx = (ex_mt.date_start - scope_date_start).days
+            day_end_idx = (ex_mt.date_end - scope_date_start).days
 
-        # Converting hour and minute to half-hour interval index
-        time_start_idx = (
-            2 * (ex_mt.time_start.hour - scope_hour_start) + ex_mt.time_start.minute // 30
-        )
-        time_end_idx = (
-            2 * (ex_mt.time_end.hour - scope_hour_start) + ex_mt.time_end.minute // 30 - 1
-        )
+            # Converting hour and minute to half-hour interval index.
+            time_start_idx = (
+                2 * (ex_mt.time_start.hour - scope_hour_start) + ex_mt.time_start.minute // 30
+            )
+            time_end_idx = (
+                2 * (ex_mt.time_end.hour - scope_hour_start) + ex_mt.time_end.minute // 30 - 1
+            )
 
-        # Update the array for where the class occurs.
-        calc[
-            day_start_idx : day_end_idx + 1, time_start_idx : time_end_idx + 1
-        ] += ex_mt.seats_filled
+            # Update the array for where the class occurs.
+            calc[
+                day_start_idx : day_end_idx + 1, time_start_idx : time_end_idx + 1
+            ] += ex_mt.seats_filled
 
     # Save the array to a CSV file.
     # Adding headers for times and a sidebar for dates.

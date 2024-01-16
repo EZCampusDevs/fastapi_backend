@@ -26,18 +26,32 @@ from datetime import date
 from app import general_exceptions
 from app.cache_path_manipulation import remove_file_path
 from app.student_availability import generate_heatmap
-from py_core.course import get_courses_via
+from py_core.course import get_courses_via, get_course_ids
 from py_core.logging_util import log_endpoint
 
 router = APIRouter(prefix="/heatmap", tags=["heatmap"])
 
 
 class RequestDownloadHeatmap(BaseModel):
-    course_data_ids: list[int]
+    course_data_ids: list[int] = []
+    course_ids: list[int] = []
+    course_codes: list[str] = []
+    term_id: int | None = None  # Only required of course_codes are specified, checked by validator.
     scope_date_start: date
     scope_date_end: date
-    scope_hour_start: int
-    scope_hour_end: int
+    scope_hour_start: int = 8
+    scope_hour_end: int = 20
+
+    @root_validator()
+    def verify_term_id(cls, values):
+        course_codes = values.get("course_codes")
+        term_id = values.get("term_id")
+        if not course_codes and term_id is not None:
+            values["term_id"] = None
+        else:
+            if course_codes and term_id is None:
+                raise ValueError(f"If course_codes are specified, term_id must also be specified")
+        return values
 
     @validator("scope_hour_start")
     def verify_scope_hour_start(cls, v):
@@ -84,11 +98,19 @@ async def download_csv_heatmap(r: Request, r_model: RequestDownloadHeatmap) -> F
         FileResponse.
     """
     try:
-        if not r_model.course_data_ids:
+        if not r_model.course_data_ids and not r_model.course_ids and not r_model.course_codes:
             raise general_exceptions.API_400_COURSE_DATA_IDS_UNSPECIFIED
-        courses = get_courses_via(course_data_id_list=r_model.course_data_ids)
+
+        course_ids = get_course_ids(course_codes=r_model.course_codes, term_id=r_model.term_id)
+        course_ids.extend(r_model.course_ids)
+
+        courses = get_courses_via(
+            course_data_id_list=r_model.course_data_ids, course_id_list=list(set(course_ids))
+        )
+
         if not courses:
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
+
         csv_file_path = generate_heatmap(
             source_list=courses,
             scope_date_start=r_model.scope_date_start,
@@ -132,11 +154,19 @@ async def download_xlsx_heatmap(r: Request, r_model: RequestDownloadHeatmap) -> 
         FileResponse.
     """
     try:
-        if not r_model.course_data_ids:
+        if not r_model.course_data_ids and not r_model.course_ids and not r_model.course_codes:
             raise general_exceptions.API_400_COURSE_DATA_IDS_UNSPECIFIED
-        courses = get_courses_via(course_data_id_list=r_model.course_data_ids)
+
+        course_ids = get_course_ids(course_codes=r_model.course_codes, term_id=r_model.term_id)
+        course_ids.extend(r_model.course_ids)
+
+        courses = get_courses_via(
+            course_data_id_list=r_model.course_data_ids, course_id_list=list(set(course_ids))
+        )
+
         if not courses:
             raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
+
         xlsx_file_path = generate_heatmap(
             source_list=courses,
             scope_date_start=r_model.scope_date_start,
