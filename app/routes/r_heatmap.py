@@ -109,7 +109,7 @@ async def download_csv_heatmap(r: Request, r_model: RequestDownloadHeatmap) -> F
         )
 
         if not courses:
-            raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
+            raise general_exceptions.API_404_COURSES_NOT_FOUND
 
         csv_file_path = generate_heatmap(
             source_list=courses,
@@ -165,7 +165,7 @@ async def download_xlsx_heatmap(r: Request, r_model: RequestDownloadHeatmap) -> 
         )
 
         if not courses:
-            raise general_exceptions.API_404_COURSE_DATA_IDS_NOT_FOUND
+            raise general_exceptions.API_404_COURSES_NOT_FOUND
 
         xlsx_file_path = generate_heatmap(
             source_list=courses,

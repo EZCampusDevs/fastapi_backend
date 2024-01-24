@@ -43,6 +43,9 @@ API_404_COURSE_DATA_IDS_NOT_FOUND = HTTPException(
 API_404_COURSE_IDS_NOT_FOUND = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND, detail="course_ids not found."
 )
+API_404_COURSES_NOT_FOUND = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND, detail="course_ids not found."
+)
 API_500_ERROR = HTTPException(
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
     detail="Internal server error. The issue has been logged and will be reviewed by the "
